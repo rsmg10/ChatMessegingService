@@ -1,4 +1,4 @@
-﻿namespace Messaging.Api.Db.Enums;
+﻿namespace Messaging.Api.Domain.Enums;
 
 public enum MessageType
 {

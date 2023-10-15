@@ -1,4 +1,4 @@
-﻿using Messaging.Api.Db.Enums;
+﻿using Messaging.Api.Domain.Enums;
 
 namespace Messaging.Api.Domain.Dto;
 
@@ -11,5 +11,4 @@ public class SendMessageDto
     public Guid UserId { get; set; }
     public Guid TaskId { get; set; }
     public IFormFile? File { get; set; }
-}
-// or the client could upload the file independently and send an Id
+} 
