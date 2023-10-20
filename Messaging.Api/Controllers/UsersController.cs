@@ -1,8 +1,12 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Mapster;
+using MapsterMapper;
 using Messaging.Api.Db;
+using Messaging.Api.Domain.Dto;
 using Messaging.Api.Domain.Entities;
+using Messaging.Api.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -15,11 +19,13 @@ namespace Messaging.Api.Controllers;
 public class UsersController : ControllerBase
 {
     private readonly ChatDb _db;
+    private readonly IMapper _mapper;
 
 
-    public UsersController(ChatDb db)
+    public UsersController(ChatDb db, IMapper mapper)
     {
         _db = db;
+        _mapper = mapper;
     }
     [HttpGet]
     public string GetAccessTokenWithClaims(string email)
@@ -76,7 +82,8 @@ public class UsersController : ControllerBase
         [HttpGet]
         public async Task<IActionResult> GetAllUsers()
         {
-            var user = await _db.Users.Include(x=> x.Rooms).ToListAsync();
+            var user = await _db.Users.Include(x=> x.Rooms).ProjectToType<UserDto>(_mapper.Config)
+                .ToListAsync();
             return Ok(user);
         }
 

@@ -2,13 +2,11 @@
 using System.Security.Claims;
 using System.Text;
 using Messaging.Api.Attributes;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
+using Messaging.Api.Services;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.Extensions.Primitives;
 using Microsoft.IdentityModel.Tokens;
 
-namespace Messaging.Api.Services;
+namespace Messaging.Api.Hubs;
 
 public interface IToClient
 {
@@ -30,21 +28,29 @@ public class EmailBasedUserIdProvider : IUserIdProvider
 
 public class ChatHub : Hub
 {
-    
+    private readonly ChatService _chatService;
+    public ChatHub(ChatService chatService)
+    {
+        _chatService = chatService;
+    }
+
     public async Task SendToGroup(string roomName, string message)
     {
         await Clients.Groups(roomName).SendAsync("ReceiveMessage", message, "___");
     }
 
-    public override Task OnConnectedAsync()
+    public override async Task OnConnectedAsync()
     {
-        // var groupNames = GetGroupNames();
-        // foreach (var groupName in groupNames)
-        // {
-        //     Groups.AddToGroupAsync(Context.ConnectionId, groupName);
-        // }
+        var claims = GetClaims();
+        var email = claims.FirstOrDefault(x => x.Type == "Email")?.Value;
+        var rooms = await _chatService.GetUserRooms(email);
         
-        return base.OnConnectedAsync();
+        foreach (var room in rooms)
+        {
+            await Groups.AddToGroupAsync(Context.ConnectionId, room.Name);
+        }
+        
+        await base.OnConnectedAsync();
     }
     
     public Task SendMessageToAll(string message)

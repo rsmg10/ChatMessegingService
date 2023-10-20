@@ -1,4 +1,6 @@
 using Messaging.Api.Db;
+using Messaging.Api.Helpers;
+using Messaging.Api.Hubs;
 using Messaging.Api.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -14,6 +16,7 @@ JsonConvert.DefaultSettings = () => new JsonSerializerSettings
 };
 // Add services to the container.
 builder.Services.AddDbContext<ChatDb>();
+builder.Services.AddMapper();
 // JsonSerializerOptions.Default.ReferenceHandler = ReferenceHandler.Preserve;
 using (var scoped = builder.Services.BuildServiceProvider().CreateScope())
 {
@@ -68,7 +71,7 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddNewtonsoftJson(x => x.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);;  
     //.AddXmlDataContractSerializerFormatters();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
